@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Exception;
 /**
  *
  * @author mikenotpike/SolDev69 <michaelcraft1104@gmail.com>
@@ -30,7 +31,11 @@ public class VersionReleasedCmd extends Command {
         this.name = "version released";
         this.help = "When was {x} version released?";
         this.aliases = bot.getConfig().getAliases(this.name);
-        VERSIONMAP.put("1.20.1", readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime").toString());
+        try {
+            VERSIONMAP.put("1.20.1", readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
