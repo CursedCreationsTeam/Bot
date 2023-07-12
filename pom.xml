@@ -28,6 +28,12 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20230618</version>
+        </dependency>
+
         <!-- Discord Dependencies -->
         <dependency>
             <groupId>net.dv8tion</groupId>
