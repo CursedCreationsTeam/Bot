@@ -1,2 +1,3 @@
 this fork seeks to update the original bot with special features for our discord server, all custom files will have their author specifically denoted in javadocs
 this file is the only altered file, as I don't think it's a good idea to keep the original since this fork serves a different purpose
+we also have a custom build.yml workflow to build the bot
