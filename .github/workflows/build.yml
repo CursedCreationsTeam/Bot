@@ -22,8 +22,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-      - name: build
-        run: mv target/*-All.jar SKBot-testing.jar
+      - name: build + rename jar
+        run: mvn --batch-mode --update-snapshots verify; mv target/*-All.jar SKBot-testing.jar
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' }} # Only upload artifacts built on one OS
         uses: actions/upload-artifact@v2
