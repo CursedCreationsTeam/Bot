@@ -28,11 +28,12 @@ public class VersionReleasedCmd extends Command {
     protected final HashMap<String, String> VERSIONMAP = new HashMap<>();
 
     public VersionReleasedCmd(Bot bot) {
-        this.name = "version released";
+        this.name = "version";
         this.help = "When was {x} version released?";
         this.aliases = bot.getConfig().getAliases(this.name);
         try {
             VERSIONMAP.put("1.20.1", readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime").toString());
+            VERSIONMAP.put("VMAP_FULL", readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,6 +42,16 @@ public class VersionReleasedCmd extends Command {
     @Override
     protected void execute(CommandEvent event) {
         MessageBuilder builder = new MessageBuilder().append(event.getArgs() + " released on " + VERSIONMAP.get(event.getArgs()));
+        try {
+            event.getChannel().sendMessage(builder.build()).queue();
+        } catch (IllegalStateException illegalStateException) {
+            event.getChannel().sendMessage(new MessageBuilder().append(illegalStateException.toString()).build()).queue();
+        }
+//        try {
+//            System.out.println(readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime"));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
     
     private static String readAll(Reader rd) throws IOException {

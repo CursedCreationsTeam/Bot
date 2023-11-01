@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.examples.command.*;
 import com.jagrosh.jmusicbot.commands.admin.*;
 import com.jagrosh.jmusicbot.commands.dj.*;
 import com.jagrosh.jmusicbot.commands.general.*;
+import com.jagrosh.jmusicbot.commands.minecraft.VersionReleasedCmd;
 import com.jagrosh.jmusicbot.commands.music.*;
 import com.jagrosh.jmusicbot.commands.owner.*;
 import com.jagrosh.jmusicbot.entities.Prompt;
@@ -141,7 +142,9 @@ public class JMusicBot
                         new SetgameCmd(bot),
                         new SetnameCmd(bot),
                         new SetstatusCmd(bot),
-                        new ShutdownCmd(bot)
+                        new ShutdownCmd(bot),
+
+                        new VersionReleasedCmd(bot)
                 );
         if(config.useEval())
             cb.addCommand(new EvalCmd(bot));
