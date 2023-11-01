@@ -1,13 +1,14 @@
 package com.jagrosh.jmusicbot.commands.minecraft;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
-import com.jagrosh.jmusicbot.settings.Settings;
 import net.dv8tion.jda.api.MessageBuilder;
 
 import java.io.BufferedReader;
@@ -22,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Exception;
-import java.util.List;
 
 import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 
@@ -45,34 +45,48 @@ public class VersionReleasedCmd extends Command {
     }
 
     private void offload_stringFormat() throws IOException {
-        ArrayList<List<String>> arrayList = offload_arrayFormat();
-        arrayList.forEach(list -> VERSIONMAP.put(list.get(4), list.get(7)));
-    }
-
-    private ArrayList<List<String>> offload_arrayFormat() throws IOException {
-        ArrayList<List<String>> final_list = new ArrayList<>();
-        String string = readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString();
-        string = string.replaceAll("[\\[\\] ]", "");
-        String[] elements = string.split(",");
-        List<String> versions_Partial = Arrays.asList(elements);
-        versions_Partial.forEach(s -> {
-            String[] temp_array = s.replaceAll("[\\{\\} ]", "").split(",");
-            List<String> temp = Arrays.asList(temp_array);
-            final_list.add(temp);
+        List<Version> arrayList = offload_arrayFormat();
+        arrayList.forEach(version -> {
+            System.out.println("Throwing " + version.getId() + " and " + version.getUrl() + " into the map!");
+            VERSIONMAP.put(version.getId(), version.getUrl());
         });
-
-        return final_list;
     }
+    private List<Version> offload_arrayFormat() throws IOException {
+        String jsonString = readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString();
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Version> myObjects = null;
+        try {
+            myObjects = objectMapper.readValue(jsonString, new TypeReference<List<Version>>() {});
+            for (Version obj : myObjects) {
+                System.out.println(obj.getId());
+                System.out.println(obj.getUrl());
+                // Access other fields as needed
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return myObjects;
+    }
+    private static String parseTime(String unparsedTime) {
+        // Parse the input string into an OffsetDateTime
+        OffsetDateTime dateTime = OffsetDateTime.parse(unparsedTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        // Format the OffsetDateTime into the desired format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 'at' hh:mma");
+        String formattedDate = dateTime.format(formatter);
+
+        return formattedDate;
+    }
     @Override
     protected void execute(CommandEvent event) {
-        MessageBuilder builder = new MessageBuilder().append(event.getArgs() + " released on " + VERSIONMAP.get(event.getArgs()));
+        MessageBuilder builder;
+        try {
+            builder = new MessageBuilder().append(event.getArgs() + " released on " + parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         handleError(builder, event, () -> System.out.println(VERSIONMAP.get(event.getArgs())));
-//        try {
-//            System.out.println(readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime"));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
     
     private static String readAll(Reader rd) throws IOException {
