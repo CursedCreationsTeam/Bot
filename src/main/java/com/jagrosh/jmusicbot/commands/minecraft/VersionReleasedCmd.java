@@ -1,5 +1,7 @@
 package com.jagrosh.jmusicbot.commands.minecraft;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -20,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Exception;
+import java.util.List;
 
 import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 
@@ -35,11 +38,30 @@ public class VersionReleasedCmd extends Command {
         this.help = "When was {x} version released?";
         this.aliases = bot.getConfig().getAliases(this.name);
         try {
-            VERSIONMAP.put("1.20.1", readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime").toString());
-            VERSIONMAP.put("VMAP_FULL", readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString());
+            offload_stringFormat();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void offload_stringFormat() throws IOException {
+        ArrayList<List<String>> arrayList = offload_arrayFormat();
+        arrayList.forEach(list -> VERSIONMAP.put(list.get(4), list.get(7)));
+    }
+
+    private ArrayList<List<String>> offload_arrayFormat() throws IOException {
+        ArrayList<List<String>> final_list = new ArrayList<>();
+        String string = readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString();
+        string = string.replaceAll("[\\[\\] ]", "");
+        String[] elements = string.split(",");
+        List<String> versions_Partial = Arrays.asList(elements);
+        versions_Partial.forEach(s -> {
+            String[] temp_array = s.replaceAll("[\\{\\} ]", "").split(",");
+            List<String> temp = Arrays.asList(temp_array);
+            final_list.add(temp);
+        });
+
+        return final_list;
     }
 
     @Override
@@ -72,5 +94,9 @@ public class VersionReleasedCmd extends Command {
         } finally {
             is.close();
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        System.out.println(Arrays.toString(readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString().split("},")));
     }
 }
