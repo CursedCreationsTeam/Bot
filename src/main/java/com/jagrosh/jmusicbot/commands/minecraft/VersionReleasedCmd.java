@@ -20,6 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Exception;
+
+import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
+
 /**
  *
  * @author mikenotpike/SolDev69 <michaelcraft1104@gmail.com>
@@ -42,11 +45,7 @@ public class VersionReleasedCmd extends Command {
     @Override
     protected void execute(CommandEvent event) {
         MessageBuilder builder = new MessageBuilder().append(event.getArgs() + " released on " + VERSIONMAP.get(event.getArgs()));
-        try {
-            event.getChannel().sendMessage(builder.build()).queue();
-        } catch (IllegalStateException illegalStateException) {
-            event.getChannel().sendMessage(new MessageBuilder().append(illegalStateException.toString()).build()).queue();
-        }
+        handleError(builder, event, () -> System.out.println(VERSIONMAP.get(event.getArgs())));
 //        try {
 //            System.out.println(readJsonFromUrl("https://piston-meta.mojang.com/v1/packages/715ccf3330885e75b205124f09f8712542cbe7e0/1.20.1.json").get("releaseTime"));
 //        } catch (IOException e) {
