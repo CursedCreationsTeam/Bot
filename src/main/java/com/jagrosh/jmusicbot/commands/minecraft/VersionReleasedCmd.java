@@ -76,13 +76,15 @@ public class VersionReleasedCmd extends Command {
         MessageBuilder builder = new MessageBuilder();
         try {
             builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+            MessageBuilder finalBuilder = builder;
+            handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
-            ErrorHandle.defaultRoC(event, e);
+            //ErrorHandle.defaultRoC(event, e);
+            e.printStackTrace();
+            event.getChannel().sendMessage("This version doesn't exist!").queue();
         }
-        MessageBuilder finalBuilder = builder;
-        handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
     }
-    
+
     private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -91,7 +93,7 @@ public class VersionReleasedCmd extends Command {
         }
         return sb.toString();
     }
-    
+
     public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
         try (InputStream is = new URL(url).openStream()) {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
