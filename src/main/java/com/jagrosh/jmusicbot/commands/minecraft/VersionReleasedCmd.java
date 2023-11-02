@@ -26,7 +26,7 @@ import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
  * @author mikenotpike/SolDev69 <michaelcraft1104@gmail.com>
  */
 public class VersionReleasedCmd extends Command {
-    public static boolean debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
+    public static boolean debug = false;
     protected final HashMap<String, String> VERSIONMAP = new HashMap<>();
     public VersionReleasedCmd(Bot bot) {
         this.name = "version";
@@ -37,6 +37,7 @@ public class VersionReleasedCmd extends Command {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
     }
 
     private void offload_stringFormat() throws IOException {
