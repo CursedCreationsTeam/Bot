@@ -37,7 +37,9 @@ public class VersionReleasedCmd extends Command {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
+        try {
+            debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
+        } catch (NullPointerException ignored) {}
     }
 
     private void offload_stringFormat() throws IOException {
