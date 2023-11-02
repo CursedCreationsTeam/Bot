@@ -81,16 +81,14 @@ public class VersionReleasedCmd extends Command {
     }
     @Override
     protected void execute(CommandEvent event) {
-        AtomicReference<MessageBuilder> builder = new AtomicReference<>();
-
-        handleError(() -> {
-            try {
-                builder.set(new MessageBuilder().append(event.getArgs() + " released on " + parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString())));
-            } catch (IOException e) {
-                ErrorHandle.defaultRoC(event, e);
-            }
-        }, event);
-        handleError(() -> event.getChannel().sendMessage(builder.get().build()).queue(), event);
+        MessageBuilder builder = new MessageBuilder();
+        try {
+            builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+        } catch (IOException e) {
+            ErrorHandle.defaultRoC(event, e);
+        }
+        MessageBuilder finalBuilder = builder;
+        handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
     }
     
     private static String readAll(Reader rd) throws IOException {
