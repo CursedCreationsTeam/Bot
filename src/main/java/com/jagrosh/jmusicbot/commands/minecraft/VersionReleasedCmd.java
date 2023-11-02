@@ -28,7 +28,6 @@ import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 public class VersionReleasedCmd extends Command {
     public static boolean debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
     protected final HashMap<String, String> VERSIONMAP = new HashMap<>();
-
     public VersionReleasedCmd(Bot bot) {
         this.name = "version";
         this.help = "When was {x} version released?";
@@ -83,7 +82,7 @@ public class VersionReleasedCmd extends Command {
         } catch (IOException e) {
             event.getChannel().sendMessage("This version doesn't exist!").queue();
             if (debug)
-                ErrorHandle.defaultRoC(event, e);
+                ErrorHandle.errorHandle(event, e);
         }
     }
 
