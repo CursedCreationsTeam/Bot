@@ -1,18 +1,20 @@
 package com.jagrosh.jmusicbot.utils;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jmusicbot.commands.minecraft.VersionReleasedCmd;
 import net.dv8tion.jda.api.MessageBuilder;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ErrorHandle {
     public static void defaultRoC(CommandEvent event, Exception caughtException)
     {
-        event.getChannel().sendMessage(new MessageBuilder().append((caughtException).toString()).build()).queue();
+        event.getChannel().sendMessage(new MessageBuilder().append(caughtException.getLocalizedMessage()).build()).queue();
+        // Todo: Make this an embed
+        if (VersionReleasedCmd.debug)
+            for (StackTraceElement stackTraceElement : caughtException.getStackTrace())
+                handleError(() -> event.getChannel().sendMessage(new MessageBuilder().append(stackTraceElement.toString()).build()).queue(), event);
     }
     public static Exception caughtException;
-    public static void handleError(Runnable runAttempt, CommandEvent event, Runnable runWhenDone) throws Exception {
+    public static void handleError(Runnable runAttempt, CommandEvent event, Runnable runWhenDone) {
         handleError(runAttempt, event);
         runWhenDone.run();
     }

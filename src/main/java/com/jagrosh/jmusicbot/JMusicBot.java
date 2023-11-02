@@ -66,7 +66,7 @@ public class JMusicBot
             }
         startBot();
     }
-    
+    public static BotConfig config;
     private static void startBot()
     {
         // create prompt to handle startup
@@ -77,7 +77,7 @@ public class JMusicBot
         OtherUtil.checkJavaVersion(prompt);
         
         // load config
-        BotConfig config = new BotConfig(prompt);
+        config = new BotConfig(prompt);
         config.load();
         if(!config.isValid())
             return;

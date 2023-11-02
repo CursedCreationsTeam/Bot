@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.utils.ErrorHandle;
 import net.dv8tion.jda.api.MessageBuilder;
 import org.json.JSONException;
@@ -25,6 +26,7 @@ import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
  * @author mikenotpike/SolDev69 <michaelcraft1104@gmail.com>
  */
 public class VersionReleasedCmd extends Command {
+    public static boolean debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
     protected final HashMap<String, String> VERSIONMAP = new HashMap<>();
 
     public VersionReleasedCmd(Bot bot) {
@@ -79,9 +81,9 @@ public class VersionReleasedCmd extends Command {
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
-            //ErrorHandle.defaultRoC(event, e);
-            e.printStackTrace();
             event.getChannel().sendMessage("This version doesn't exist!").queue();
+            if (debug)
+                ErrorHandle.defaultRoC(event, e);
         }
     }
 
