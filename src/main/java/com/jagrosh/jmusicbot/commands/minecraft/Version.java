@@ -4,13 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Version {
-    private String id;
-    private String type;
-    private String url;
-    private String time;
-    private String releaseTime;
-    private String sha1;
-    private int complianceLevel;
+    private final String id;
+    private final String url;
 
     @JsonCreator
     public Version(
@@ -22,12 +17,7 @@ public class Version {
             @JsonProperty("sha1") String sha1,
             @JsonProperty("complianceLevel") int complianceLevel) {
         this.id = id;
-        this.type = type;
         this.url = url;
-        this.time = time;
-        this.releaseTime = releaseTime;
-        this.sha1 = sha1;
-        this.complianceLevel = complianceLevel;
     }
 
     // Add getters and setters if needed

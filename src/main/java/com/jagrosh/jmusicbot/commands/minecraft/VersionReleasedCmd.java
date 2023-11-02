@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.utils.ErrorHandle;
 import net.dv8tion.jda.api.MessageBuilder;
 
 import java.io.BufferedReader;
@@ -23,11 +24,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Exception;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 
 /**
- *
  * @author mikenotpike/SolDev69 <michaelcraft1104@gmail.com>
  */
 public class VersionReleasedCmd extends Command {
@@ -80,13 +81,19 @@ public class VersionReleasedCmd extends Command {
     }
     @Override
     protected void execute(CommandEvent event) {
-        MessageBuilder builder;
+        AtomicReference<MessageBuilder> builder = new AtomicReference<>();
+
         try {
-            builder = new MessageBuilder().append(event.getArgs() + " released on " + parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            handleError(() -> {
+                try {
+                    builder.set(new MessageBuilder().append(event.getArgs() + " released on " + parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString())));
+                } catch (IOException e) {
+                    ErrorHandle.defaultRoC(event, e);
+                }
+            }, event, () -> handleError(() -> event.getChannel().sendMessage(builder.get().build()).queue(), event));
+        } catch (Exception e) {
+            ErrorHandle.defaultRoC(event, e);
         }
-        handleError(builder, event, () -> System.out.println(VERSIONMAP.get(event.getArgs())));
     }
     
     private static String readAll(Reader rd) throws IOException {
