@@ -1,9 +1,5 @@
 package com.jagrosh.jmusicbot.commands.minecraft;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jdautilities.command.Command;
@@ -11,20 +7,17 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
 import com.jagrosh.jmusicbot.utils.ErrorHandle;
 import net.dv8tion.jda.api.MessageBuilder;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.nio.charset.Charset;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.Exception;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 
@@ -75,9 +68,8 @@ public class VersionReleasedCmd extends Command {
 
         // Format the OffsetDateTime into the desired format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 'at' hh:mma");
-        String formattedDate = dateTime.format(formatter);
 
-        return formattedDate;
+        return dateTime.format(formatter);
     }
     @Override
     protected void execute(CommandEvent event) {
@@ -101,14 +93,10 @@ public class VersionReleasedCmd extends Command {
     }
     
     public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-        InputStream is = new URL(url).openStream();
-        try {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+        try (InputStream is = new URL(url).openStream()) {
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String jsonText = readAll(rd);
-            JSONObject json = new JSONObject(jsonText);
-            return json;
-        } finally {
-            is.close();
+            return new JSONObject(jsonText);
         }
     }
 
