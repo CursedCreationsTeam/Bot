@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jmusicbot.Bot;
+import com.jagrosh.jmusicbot.BotConfig;
 import com.jagrosh.jmusicbot.JMusicBot;
 import com.jagrosh.jmusicbot.utils.ErrorHandle;
 import net.dv8tion.jda.api.MessageBuilder;
@@ -16,7 +17,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,12 +60,11 @@ public class VersionReleasedCmd extends Command {
     }
     private static String parseTime(String unparsedTime) {
         // Parse the input string into an OffsetDateTime
-        OffsetDateTime dateTime = OffsetDateTime.parse(unparsedTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        OffsetDateTime dateTime = OffsetDateTime.parse(unparsedTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);;
 
-        // Format the OffsetDateTime into the desired format
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 'at' hh:mma");
+        Date date = Date.from(dateTime.toInstant());
 
-        return dateTime.format(formatter);
+        return date.toString();
     }
     @Override
     protected void execute(CommandEvent event) {
@@ -80,10 +80,35 @@ public class VersionReleasedCmd extends Command {
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
-            event.getChannel().sendMessage("This version doesn't exist!").queue();
-            if (debug)
-                ErrorHandle.errorHandle(event, e);
+            event.getChannel().sendMessage("This version doesn't exist in Mojang's repos! Trying betacraft...").queue();
+            try {
+                builder.clear();
+                builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl("https://files.betacraft.uk/launcher/v2/assets/jsons/" + event.getArgs() + ".json").get("releaseTime").toString())).append(" and was compiled on " ).append(fallback_betacraftmodrepo(event)[1]);
+                MessageBuilder finalBuilder = builder;
+                handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
+
+            } catch (IOException ex) {
+                event.getChannel().sendMessage("Still nothing, trying betacraft mod repo").queue();
+                try {
+                    builder.clear();
+                    builder = builder.append(event.getArgs()).append(" released on ").append(fallback_betacraftmodrepo(event)[0]).append(" and was compiled on " ).append(fallback_betacraftmodrepo(event)[1]);
+                    MessageBuilder finalBuilder = builder;
+                    handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
+
+                } catch (IOException exc) {
+                    event.getChannel().sendMessage("Sorry, this version could not be found :(").queue();
+                    if (debug)
+                        ErrorHandle.errorHandle(event, e);
+                }
+            }
+
         }
+    }
+
+    private String[] fallback_betacraftmodrepo(CommandEvent event) throws IOException {
+        Date releaseDate = new Date(Long.parseLong(readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[0].split(":")[1]));
+        Date compileDate = new Date(Long.parseLong(readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1]));
+        return new String[] { releaseDate.toString(), compileDate.toString() };
     }
 
     private static String readAll(Reader rd) throws IOException {
@@ -102,8 +127,10 @@ public class VersionReleasedCmd extends Command {
             return new JSONObject(jsonText);
         }
     }
-
-    public static void main(String[] args) throws IOException {
-        System.out.println(Arrays.toString(readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString().split("},")));
+    public static String readFileFromUrl(String url) throws IOException {
+        try (InputStream is = new URL(url).openStream()) {
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            return readAll(rd);
+        }
     }
 }
