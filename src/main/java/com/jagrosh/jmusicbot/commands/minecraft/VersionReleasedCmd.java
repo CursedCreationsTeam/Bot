@@ -33,11 +33,6 @@ public class VersionReleasedCmd extends Command {
         this.help = "When was {x} version released?";
         this.aliases = bot.getConfig().getAliases(this.name);
         try {
-            offload_stringFormat();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
             debug = JMusicBot.config.getGame().getName().equals("ALPHA TESTING");
         } catch (NullPointerException ignored) {}
     }
@@ -48,6 +43,7 @@ public class VersionReleasedCmd extends Command {
             System.out.println("Throwing " + version.getId() + " and " + version.getUrl() + " into the map!");
             VERSIONMAP.put(version.getId(), version.getUrl());
         });
+        System.out.println();
     }
     private List<Version> offload_arrayFormat() throws IOException {
         String jsonString = readJsonFromUrl("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").get("versions").toString();
@@ -56,11 +52,6 @@ public class VersionReleasedCmd extends Command {
         List<Version> myObjects = null;
         try {
             myObjects = objectMapper.readValue(jsonString, new TypeReference<List<Version>>() {});
-            for (Version obj : myObjects) {
-                System.out.println(obj.getId());
-                System.out.println(obj.getUrl());
-                // Access other fields as needed
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,6 +68,12 @@ public class VersionReleasedCmd extends Command {
     }
     @Override
     protected void execute(CommandEvent event) {
+        try {
+            offload_stringFormat();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         MessageBuilder builder = new MessageBuilder();
         try {
             builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
