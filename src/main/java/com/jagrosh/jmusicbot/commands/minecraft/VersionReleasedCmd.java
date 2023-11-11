@@ -106,7 +106,7 @@ public class VersionReleasedCmd extends Command {
         
         MessageBuilder builder = new MessageBuilder();
         try {
-            builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl("https://files.betacraft.uk/launcher/v2/assets/jsons/" + event.getArgs() + ".json").get("releaseTime").toString())).append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
+            builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl("https://files.betacraft.uk/launcher/v2/assets/jsons/" + event.getArgs() + ".json").get("releaseTime").toString())).append(" and was compiled on " ).append(convertDateString(callBetacraftModRepo(event)[1]));
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
