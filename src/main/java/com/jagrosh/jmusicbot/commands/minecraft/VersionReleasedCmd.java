@@ -89,7 +89,7 @@ public class VersionReleasedCmd extends Command {
         try {
             builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
             try {
-                builder = builder.append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
+                builder = builder.append(" and was compiled on " ).append(parseTime((String) callBetacraftModRepo(event)[0][1]));
             } catch (IOException ioException) {
                 if (debug)
                     ErrorHandle.errorHandle(event, ioException);
@@ -112,15 +112,16 @@ public class VersionReleasedCmd extends Command {
 
         }
     }
-    /*
-     *
-     */
-    private String[] callBetacraftModRepo(CommandEvent event) throws IOException {
+
+
+    private Object[][] callBetacraftModRepo(CommandEvent event) throws IOException {
         String releaseTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[0].split(":")[1];
         Date releaseDate = new Date(Long.parseLong(releaseTime));
         String compileTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1];
         Date compileDate = new Date(Long.parseLong(compileTime));
-        return new String[] { releaseTime.equals("0") ? "an unspecified date" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified date" : compileDate.toString()};
+        String[] dateStrings = new String[] { releaseTime.equals("0") ? "an unspecified date" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified date" : compileDate.toString()};
+        Date[] dates = new Date[] {releaseDate, compileDate};
+        return new Object[][] { dateStrings, dates }; // Don't think using a hashmap would be very good here, if someone knows how to do this better lmk
     }
 
     private static String readAll(Reader rd) throws IOException {
