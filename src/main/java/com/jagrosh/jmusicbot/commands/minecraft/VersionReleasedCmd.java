@@ -14,12 +14,14 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static com.jagrosh.jmusicbot.utils.ErrorHandle.handleError;
 
@@ -72,6 +74,23 @@ public class VersionReleasedCmd extends Command {
         // Return the string
         return formattedDate;
     }
+
+    private static String convertDateString(String originalDateString) {
+        try {
+            // Parse the original date string
+            SimpleDateFormat originalFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+            Date date = originalFormat.parse(originalDateString);
+
+            // Format the date as a string in the desired format
+            SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd 'at' h:mma z", Locale.ENGLISH);
+            return newFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace(); // Handle the ParseException as needed
+            return null;
+        }
+    }
+
+
     private static String parseDate(Date date) {
         // Format date as a string in the desired format
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd 'at' hh:mma z");
@@ -87,25 +106,20 @@ public class VersionReleasedCmd extends Command {
         
         MessageBuilder builder = new MessageBuilder();
         try {
-            builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
-//            try {
-//                // I'll do this later
-//                builder.append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
-//            } catch (IOException ioException) {
-//                builder.append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
-//                if (debug)
-//                    ErrorHandle.errorHandle(event, ioException);
-//            }
+            builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl("https://files.betacraft.uk/launcher/v2/assets/jsons/" + event.getArgs() + ".json").get("releaseTime").toString())).append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
-            event.getChannel().sendMessage("This version doesn't exist in Mojang's repos! Trying betacraft...").queue();
             try {
                 builder.clear();
-                builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl("https://files.betacraft.uk/launcher/v2/assets/jsons/" + event.getArgs() + ".json").get("releaseTime").toString())).append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
+                builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+                try {
+                    builder.append(" and was compiled on " ).append(convertDateString(callBetacraftModRepo(event)[1]));
+                } catch (IOException ioException) {
+                    builder.append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+                }
                 MessageBuilder finalBuilder = builder;
                 handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
-
             } catch (IOException ex) {
                 event.getChannel().sendMessage("Sorry, this version could not be found :(").queue();
                 if (debug)
