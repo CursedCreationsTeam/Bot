@@ -88,12 +88,6 @@ public class VersionReleasedCmd extends Command {
         MessageBuilder builder = new MessageBuilder();
         try {
             builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
-            try {
-                builder = builder.append(" and was compiled on " ).append(parseTime((String) callBetacraftModRepo(event)[0][1]));
-            } catch (IOException ioException) {
-                if (debug)
-                    ErrorHandle.errorHandle(event, ioException);
-            }
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
