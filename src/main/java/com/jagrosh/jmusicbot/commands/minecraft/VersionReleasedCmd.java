@@ -112,7 +112,7 @@ public class VersionReleasedCmd extends Command {
         Date releaseDate = new Date(Long.parseLong(releaseTime));
         String compileTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1];
         Date compileDate = new Date(Long.parseLong(compileTime));
-        return new String[] { releaseTime.equals("0") ? "an unspecified time" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified time" : compileDate.toString()};
+        return new String[] { releaseTime.equals("0") ? "an unspecified date" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified date" : compileDate.toString()};
     }
 
     private static String readAll(Reader rd) throws IOException {
