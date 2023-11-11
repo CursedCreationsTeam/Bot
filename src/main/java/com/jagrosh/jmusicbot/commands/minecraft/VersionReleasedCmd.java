@@ -88,6 +88,14 @@ public class VersionReleasedCmd extends Command {
         MessageBuilder builder = new MessageBuilder();
         try {
             builder = builder.append(event.getArgs()).append(" released on ").append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+//            try {
+//                // I'll do this later
+//                builder.append(" and was compiled on " ).append(callBetacraftModRepo(event)[1]);
+//            } catch (IOException ioException) {
+//                builder.append(parseTime(readJsonFromUrl(VERSIONMAP.get(event.getArgs())).get("releaseTime").toString()));
+//                if (debug)
+//                    ErrorHandle.errorHandle(event, ioException);
+//            }
             MessageBuilder finalBuilder = builder;
             handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
         } catch (IOException e) {
@@ -108,14 +116,14 @@ public class VersionReleasedCmd extends Command {
     }
 
 
-    private Object[][] callBetacraftModRepo(CommandEvent event) throws IOException {
+    private String[] callBetacraftModRepo(CommandEvent event) throws IOException {
         String releaseTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[0].split(":")[1];
         Date releaseDate = new Date(Long.parseLong(releaseTime));
         String compileTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1];
         Date compileDate = new Date(Long.parseLong(compileTime));
         String[] dateStrings = new String[] { releaseTime.equals("0") ? "an unspecified date" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified date" : compileDate.toString()};
-        Date[] dates = new Date[] {releaseDate, compileDate};
-        return new Object[][] { dateStrings, dates }; // Don't think using a hashmap would be very good here, if someone knows how to do this better lmk
+        //Date[] dates = new Date[] {releaseDate, compileDate};
+        return dateStrings;
     }
 
     private static String readAll(Reader rd) throws IOException {
