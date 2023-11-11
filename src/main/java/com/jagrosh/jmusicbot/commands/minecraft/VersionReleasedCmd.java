@@ -62,9 +62,9 @@ public class VersionReleasedCmd extends Command {
         // Parse the input string into an OffsetDateTime
         OffsetDateTime dateTime = OffsetDateTime.parse(unparsedTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME);;
 
-        Date date = Date.from(dateTime.toInstant());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 'at' hh:mma");
 
-        return date.toString();
+        return dateTime.format(formatter);
     }
     @Override
     protected void execute(CommandEvent event) {
@@ -88,10 +88,12 @@ public class VersionReleasedCmd extends Command {
                 handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
 
             } catch (IOException ex) {
-                event.getChannel().sendMessage("Still nothing, trying betacraft mod repo").queue();
+                event.getChannel().sendMessage("Still nothing, trying betacraft mod repo. Release dates might not be accurate!").queue();
                 try {
                     builder.clear();
-                    builder = builder.append(event.getArgs()).append(" released on ").append(fallback_betacraftmodrepo(event)[0]).append(" and was compiled on " ).append(fallback_betacraftmodrepo(event)[1]);
+                    builder = builder.append(event.getArgs()).append(" released on ").append(fallback_betacraftmodrepo(event)[0]
+                            //).append(" and was compiled on " ).append(fallback_betacraftmodrepo(event)[1]
+                            );
                     MessageBuilder finalBuilder = builder;
                     handleError(() -> event.getChannel().sendMessage(finalBuilder.build()).queue(), event);
 
@@ -106,9 +108,11 @@ public class VersionReleasedCmd extends Command {
     }
 
     private String[] fallback_betacraftmodrepo(CommandEvent event) throws IOException {
-        Date releaseDate = new Date(Long.parseLong(readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[0].split(":")[1]));
-        Date compileDate = new Date(Long.parseLong(readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1]));
-        return new String[] { releaseDate.toString(), compileDate.toString() };
+        String releaseTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[0].split(":")[1];
+        Date releaseDate = new Date(Long.parseLong(releaseTime));
+        String compileTime = readFileFromUrl("https://files.betacraft.uk/launcher/assets/jsons/" + event.getArgs() + ".info").split("\n")[1].split(":")[1];
+        Date compileDate = new Date(Long.parseLong(compileTime));
+        return new String[] { releaseTime.equals("0") ? "an unspecified time" : releaseDate.toString(), compileTime.equals("0") ? "an unspecified time" : compileDate.toString()};
     }
 
     private static String readAll(Reader rd) throws IOException {
