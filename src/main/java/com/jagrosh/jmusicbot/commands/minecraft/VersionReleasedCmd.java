@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -64,8 +65,17 @@ public class VersionReleasedCmd extends Command {
         // Create date
         Date date = Date.from(dateTime.toInstant());
 
-        // Return date as string
-        return date.toString();
+        // Format date as a string in the desired format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd 'at' hh:mma z");
+        String formattedDate = dateFormat.format(date);
+
+        // Return the string
+        return formattedDate;
+    }
+    private static String parseDate(Date date) {
+        // Format date as a string in the desired format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd 'at' hh:mma z");
+        return dateFormat.format(date);
     }
     @Override
     protected void execute(CommandEvent event) {
